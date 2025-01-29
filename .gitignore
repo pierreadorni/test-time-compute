@@ -1,0 +1,6 @@
+outputs
+outputs_archive
+venv
+.cache
+__pycache__
+logs
