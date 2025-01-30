@@ -3,24 +3,13 @@ from accelerate import Accelerator
 
 from llava.model.builder import load_pretrained_model
 import torch
-from custom_dataset import collate_fn_factory, NaturalBench
+from custom_dataset import collate_fn_factory, NaturalBench, SUFFIX_FOR_VQA, SUFFIX_FOR_COT_VQA, PREFIX_FOR_COT_VQA, PREFIX_FOR_VQA
 
 from pathlib import Path
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 import warnings
 from accelerate.utils import gather_object
-
-
-SUFFIX_FOR_VQA = {
-    "yes_no": "Please answer Yes or No.",
-    "multiple_choice": "Please output the letter corresponding to the correct option.",
-}
-
-SUFFIX_FOR_COT_VQA = {
-    "yes_no": "Give your reasoning, then answer Yes or No.",
-    "multiple_choice": "Give your reasoning, then output the letter corresponding to the correct option.",
-}
 
 
 def extract_answer(output_string, task_type="yes_no"):
@@ -202,7 +191,7 @@ def run_eval(
         dataset,
         batch_size=bs,
         collate_fn=collate_fn_factory(
-            image_processor, model.config, tokenizer, accelerator.device
+            image_processor, model.config, tokenizer, accelerator.device, PREFIX_FOR_COT_VQA if prompt_type == "cot" else PREFIX_FOR_VQA
         ),
     )
 

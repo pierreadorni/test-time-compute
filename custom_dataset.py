@@ -13,6 +13,20 @@ SUFFIX_FOR_VQA = {
     "multiple_choice": "Please output the letter corresponding to the correct option.",
 }
 
+SUFFIX_FOR_COT_VQA = {
+    "yes_no": "Give your reasoning, then answer Yes or No.",
+    "multiple_choice": "Give your reasoning, then output the letter corresponding to the correct option.",
+}
+
+PREFIX_FOR_VQA = {
+    "yes_no": "",
+    "multiple_choice": "",
+}
+
+PREFIX_FOR_COT_VQA = {
+    "yes_no": "Let's think step by step:",
+    "multiple_choice": "Let's think step by step:",
+}
 
 class NaturalBench(Dataset):
     def __init__(self, vqa_suffix=SUFFIX_FOR_VQA):
@@ -62,7 +76,7 @@ class NaturalBench(Dataset):
         return [*self.naturalbench[idx], idx]
 
 
-def collate_fn_factory(image_processor, model_config, tokenizer, device):
+def collate_fn_factory(image_processor, model_config, tokenizer, device, vqa_prefix=PREFIX_FOR_VQA):
     def collate_fn(batch):
         conv_template = "qwen_1_5"
         batch_image_tensor = process_images(
@@ -80,6 +94,7 @@ def collate_fn_factory(image_processor, model_config, tokenizer, device):
             conv.append_message(conv.roles[0], question)
             conv.append_message(conv.roles[1], None)
             prompt_question = conv.get_prompt()
+            prompt_question += vqa_prefix[example[3]]
             input_ids = tokenizer_image_token(
                 prompt_question, tokenizer, IMAGE_TOKEN_INDEX, return_tensors="pt"
             )
